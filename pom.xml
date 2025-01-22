@@ -11,7 +11,7 @@
 
   <name>desafio</name>
   <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+  <url>https://www.example.com</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -20,7 +20,13 @@
   </properties>
 
   <dependencies>
-    <!-- TODO: Inserir as dependências do sistema... -->
+
+      <dependency>
+          <groupId>org.hibernate.orm</groupId>
+          <artifactId>hibernate-core</artifactId>
+          <version>6.6.5.Final</version>
+      </dependency>
+
   </dependencies>
 
 </project>
