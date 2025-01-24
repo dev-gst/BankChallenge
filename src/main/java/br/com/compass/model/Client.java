@@ -1,6 +1,9 @@
 package br.com.compass.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Size;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -15,21 +18,33 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
+    @Size(min = 2, max = 100, message = "First name must be between 2 and 100 characters")
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
 
+    @NotNull
+    @Size(min = 2, max = 100, message = "Last name must be between 2 and 100 characters")
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
 
+    @NotNull
+    @Size(min = 10, max = 20, message = "Phone must be between 10 and 20 characters")
     @Column(name = "phone", nullable = false, length = 20)
     private String phone;
 
+    @NotNull
+    @Size(min = 5, max = 100, message = "Email must be between 5 and 100 characters")
     @Column(name = "email", nullable = false, length = 100)
     private String email;
 
+    @NotNull
+    @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
     @Column(name = "password", nullable = false, length = 100)
     private String password;
 
+    @NotNull
+    @Past(message = "Birth date must be a date in the past")
     @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;
 
