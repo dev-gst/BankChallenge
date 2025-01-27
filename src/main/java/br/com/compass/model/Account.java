@@ -19,6 +19,9 @@ public class Account {
     @JoinColumn(name = "client_id", referencedColumnName = "id", nullable = false)
     private Client client;
 
+    @Column(name = "account_number", nullable = false, length = 20)
+    private String accountNumber;
+
     @Column(name = "balance", nullable = false, precision = 10, scale = 2)
     private BigDecimal balance;
 
