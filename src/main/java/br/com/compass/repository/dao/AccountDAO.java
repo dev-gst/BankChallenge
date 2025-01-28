@@ -11,6 +11,7 @@ public class AccountDAO extends BaseDAO<Account> {
 
     public AccountDAO(EntityManager entityManager) {
         super(entityManager, Account.class);
+        this.entityManager = entityManager;
     }
 
     public Account findByAccountNumber(String accountNumber) {
@@ -19,10 +20,13 @@ public class AccountDAO extends BaseDAO<Account> {
                     FROM Account a
                     WHERE a.accountNumber = :accountNumber
                 """;
-
-        return entityManager.createQuery(rawQuery, Account.class)
-                .setParameter("accountNumber", accountNumber)
-                .getSingleResult();
+        try {
+            return entityManager.createQuery(rawQuery, Account.class)
+                    .setParameter("accountNumber", accountNumber)
+                    .getSingleResult();
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public void updateBalance(Account account, BigDecimal newBalance) {
