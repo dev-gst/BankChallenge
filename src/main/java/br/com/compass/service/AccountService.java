@@ -58,12 +58,6 @@ public class AccountService {
         return accountDAO.findByClientCpfAndPassword(cpf, password);
     }
 
-    public void displayBalance(Account account) {
-        BigDecimal balance = accountDAO.getBalance(account);
-        System.out.printf("Your current balance is: $%.2f%n", balance);
-    }
-
-
     private String generateAccountNumber(AccountType accountType) {
         int digit1 = new Random().nextInt(9);
         int digit2 = new Random().nextInt(9);
