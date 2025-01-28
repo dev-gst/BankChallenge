@@ -39,10 +39,16 @@ public class AuthenticationService {
     public Account login() {
         System.out.println("Login");
 
-        String cpf = clientInputCollector.collectCPF("Enter your CPF: ");
-        String password = clientInputCollector.collectPassword("Enter your password: ");
+        Account account;
+        try {
+            String cpf = clientInputCollector.collectCPF("Enter your CPF: ");
+            String password = clientInputCollector.collectPassword("Enter your password: ");
+            account = accountService.login(cpf, password);
+        } catch (UserCancellationInput ignored) {
+            System.out.println("You canceled the login.");
+            return null;
+        }
 
-        Account account = accountService.login(cpf, password);
 
         if (account == null) {
             System.out.println("Invalid credentials.");
