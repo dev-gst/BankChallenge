@@ -3,6 +3,7 @@ package br.com.compass.service;
 import br.com.compass.model.Client;
 import br.com.compass.repository.dao.ClientDAO;
 import br.com.compass.util.validation.ClientInputCollector;
+import com.password4j.Password;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -18,7 +19,12 @@ public class ClientService {
     }
 
     public Optional<Client> findClientByCpf(String email) {
-        return Optional.of(clientDAO.findByCpf(email));
+        Client client = clientDAO.findByCpf(email);
+        if (client == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(client);
     }
 
     public Optional<Client> createClient() {
@@ -52,6 +58,7 @@ public class ClientService {
         String phone = collector.collectPhone("Enter your phone: ");
         String email = collector.collectEmail("Enter your email: ");
         String password = collector.collectPassword("Enter your password (8-20 characters): ");
+        String hashedPassword = Password.hash(password).addSalt("my-app").withPBKDF2().toString();
         String cpf = collector.collectCPF("Enter your cpf (only numbers): ");
         LocalDate birthDate = collector.collectBirthDate("Enter your birth date (dd-MM-yyyy): ");
 
@@ -60,7 +67,7 @@ public class ClientService {
                 .withLastName(lastName)
                 .withPhone(phone)
                 .withEmail(email)
-                .withPassword(password)
+                .withPassword(hashedPassword)
                 .withBirthDate(birthDate)
                 .withCpf(cpf)
                 .build();

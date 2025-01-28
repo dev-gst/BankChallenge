@@ -39,7 +39,7 @@ public class Client {
     private String email;
 
     @NotNull
-    @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
+    @Size(min = 8, max = 255, message = "Password must be between 8 and 100 characters")
     @Column(name = "password", nullable = false, length = 100)
     private String password;
 

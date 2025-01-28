@@ -4,6 +4,8 @@ import br.com.compass.model.Account;
 import br.com.compass.model.Client;
 import br.com.compass.util.exception.UserCancellationInput;
 import br.com.compass.util.validation.ClientInputCollector;
+import com.password4j.Hash;
+import com.password4j.Password;
 
 import java.util.Optional;
 
@@ -43,7 +45,8 @@ public class AuthenticationService {
         try {
             String cpf = clientInputCollector.collectCPF("Enter your CPF: ");
             String password = clientInputCollector.collectPassword("Enter your password: ");
-            account = accountService.login(cpf, password);
+            Hash passwordHash = Password.hash(password).addSalt("my-app").withPBKDF2();
+            account = accountService.login(cpf, passwordHash.toString());
         } catch (UserCancellationInput ignored) {
             System.out.println("You canceled the login.");
             return null;
