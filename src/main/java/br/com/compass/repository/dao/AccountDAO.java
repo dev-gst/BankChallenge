@@ -46,6 +46,12 @@ public class AccountDAO extends BaseDAO<Account> {
         }
     }
 
+    public BigDecimal getBalance(Account account) {
+        return entityManager.createQuery("SELECT a.balance FROM Account a WHERE a.id = :accountId", BigDecimal.class)
+                .setParameter("accountId", account.getId())
+                .getSingleResult();
+    }
+
     public void updateBalance(Account account, BigDecimal newBalance) {
         entityManager.createQuery("UPDATE Account a SET a.balance = :newBalance WHERE a.id = :accountId")
                 .setParameter("newBalance", newBalance)
