@@ -1,23 +1,17 @@
 package br.com.compass.model;
 
+import br.com.compass.model.enumeration.AccountType;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
-import java.util.Random;
 import java.util.UUID;
 
 @Entity
 @Table(name = "account")
 @SuppressWarnings("unused")
 public class Account {
-
-    public enum AccountType {
-        CHECKING,
-        SAVINGS,
-        SALARY
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
