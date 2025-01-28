@@ -3,102 +3,162 @@ package br.com.compass.service;
 import br.com.compass.model.Account;
 import br.com.compass.model.Transaction;
 import br.com.compass.model.enumeration.TransactionType;
-import br.com.compass.repository.dao.AccountDAO;
 import br.com.compass.repository.dao.TransactionDAO;
+import br.com.compass.util.exception.UserCancellationInput;
+import br.com.compass.util.validation.TransactionInputCollector;
 
 import java.math.BigDecimal;
 
 public class TransactionService {
 
-    private final TransactionDAO transferDAO;
-    private final AccountDAO accountDAO;
+    private final TransactionDAO transactionDAO;
+    private final AccountService accountService;
+    private final TransactionInputCollector collector;
 
     public TransactionService(
-            TransactionDAO transferDAO,
-            AccountDAO accountDAO
+            TransactionDAO transactionDAO,
+            AccountService accountService,
+            TransactionInputCollector collector
     ) {
-        this.transferDAO = transferDAO;
-        this.accountDAO = accountDAO;
+        this.transactionDAO = transactionDAO;
+        this.accountService = accountService;
+        this.collector = collector;
     }
 
-    public void transfer(
-            Account sourceAccount,
-            Account destinationAccount,
-            BigDecimal value
-    ) {
+    public void transfer(Account sourceAccount) {
+        Account destinationAccount;
+        try {
+            destinationAccount = accountService.findDestinationByAccountNumber().orElse(null);
+        } catch (UserCancellationInput ignored) {
+            System.out.println("Operation canceled.");
+            return;
+        }
+
+        if (destinationAccount == null) {
+            System.out.println("Destination account not found.");
+            return;
+        }
+
+        BigDecimal value;
+        try {
+            value = getAmount();
+        } catch (UserCancellationInput ignored) {
+            System.out.println("Operation canceled.");
+            return;
+        }
+
         if (!checkTransferValues(sourceAccount, destinationAccount, value)) {
             return;
         }
 
-        accountDAO.startTransaction();
-        transferDAO.startTransaction();
+        try {
+            transactionDAO.startTransaction();
 
-        Transaction transaction = new Transaction.Builder()
-                .withSourceAccount(sourceAccount)
-                .withDestinationAccount(destinationAccount)
-                .withAmount(value)
-                .withType(TransactionType.TRANSFER)
-                .build();
+            Transaction transaction = new Transaction.Builder()
+                    .withSourceAccount(sourceAccount)
+                    .withDestinationAccount(destinationAccount)
+                    .withAmount(value)
+                    .withType(TransactionType.TRANSFER)
+                    .build();
 
-        sourceAccount.setBalance(sourceAccount.getBalance().subtract(value));
-        destinationAccount.setBalance(destinationAccount.getBalance().add(value));
+            BigDecimal sourceNewBalance = sourceAccount.getBalance().subtract(value);
+            BigDecimal destinationNewBalance = destinationAccount.getBalance().add(value);
 
-        accountDAO.updateBalance(sourceAccount, sourceAccount.getBalance());
-        accountDAO.updateBalance(destinationAccount, destinationAccount.getBalance());
-        transferDAO.save(transaction);
+            accountService.updateBalance(sourceAccount, sourceNewBalance);
+            accountService.updateBalance(destinationAccount, destinationNewBalance);
 
-        accountDAO.commitTransaction();
-        transferDAO.commitTransaction();
+            transactionDAO.save(transaction);
+
+            transactionDAO.commitTransaction();
+        } catch (Exception ignored) {
+            transactionDAO.rollbackTransaction();
+            System.out.println("An error occurred while transferring the amount.");
+        }
     }
 
-    public void deposit(Account destinationAccount, BigDecimal value) {
-        if (!valueGreaterThenZero(value)) {
+    public void deposit(Account destinationAccount) {
+        BigDecimal value;
+        try {
+            value = getAmount();
+        } catch (UserCancellationInput ignored) {
+            System.out.println("Operation canceled.");
             return;
         }
 
-        accountDAO.startTransaction();
+        if (valueIsNegativeOrZero(value)) {
+            System.out.println("The value must be greater than zero.");
+            return;
+        }
 
-        Transaction transaction = new Transaction.Builder()
-                .withDestinationAccount(destinationAccount)
-                .withAmount(value)
-                .withType(TransactionType.DEPOSIT)
-                .build();
+        try {
+            transactionDAO.startTransaction();
 
-        destinationAccount.setBalance(destinationAccount.getBalance().add(value));
+            Transaction transaction = new Transaction.Builder()
+                    .withDestinationAccount(destinationAccount)
+                    .withAmount(value)
+                    .withType(TransactionType.DEPOSIT)
+                    .build();
 
-        accountDAO.updateBalance(destinationAccount, destinationAccount.getBalance());
-        transferDAO.save(transaction);
+            transactionDAO.save(transaction);
 
-        accountDAO.commitTransaction();
+            BigDecimal newBalance = destinationAccount.getBalance().add(value);
+
+            accountService.updateBalance(destinationAccount, newBalance);
+
+            transactionDAO.commitTransaction();
+        } catch (Exception ignored) {
+            transactionDAO.rollbackTransaction();
+            System.out.println("An error occurred while depositing the amount.");
+        }
     }
 
-    public void withdraw(Account sourceAccount, BigDecimal value) {
-        if (hasBalance(sourceAccount, value)) {
+    public void withdraw(Account sourceAccount) {
+        BigDecimal value;
+        try {
+            value = getAmount();
+        } catch (UserCancellationInput ignored) {
+            System.out.println("Operation canceled.");
             return;
         }
 
-        if (!valueGreaterThenZero(value)) {
+        if (missingFunds(sourceAccount, value)) {
+            System.out.println("Insufficient funds.");
             return;
         }
 
-        accountDAO.startTransaction();
+        if (valueIsNegativeOrZero(value)) {
+            System.out.println("The value must be greater than zero.");
+            return;
+        }
 
-        Transaction transaction = new Transaction.Builder()
-                .withSourceAccount(sourceAccount)
-                .withAmount(value)
-                .withType(TransactionType.WITHDRAW)
-                .build();
+        try {
+            transactionDAO.startTransaction();
 
-        sourceAccount.setBalance(sourceAccount.getBalance().subtract(value));
+            Transaction transaction = new Transaction.Builder()
+                    .withSourceAccount(sourceAccount)
+                    .withAmount(value)
+                    .withType(TransactionType.WITHDRAW)
+                    .build();
 
-        accountDAO.updateBalance(sourceAccount, sourceAccount.getBalance());
-        transferDAO.save(transaction);
+            BigDecimal newBalance = sourceAccount.getBalance().subtract(value);
 
-        accountDAO.commitTransaction();
+            accountService.updateBalance(sourceAccount, newBalance);
+
+            transactionDAO.save(transaction);
+
+            transactionDAO.commitTransaction();
+        } catch (Exception ignored) {
+            transactionDAO.rollbackTransaction();
+            System.out.println("An error occurred while withdrawing the amount.");
+        }
+    }
+
+    private BigDecimal getAmount() {
+        return collector.collectAmount("Enter the amount: ");
     }
 
     private static boolean checkTransferValues(Account sourceAccount, Account destinationAccount, BigDecimal value) {
-        if (!hasBalance(sourceAccount, value)) {
+        if (missingFunds(sourceAccount, value)) {
             System.out.println("Insufficient funds.");
             return false;
         }
@@ -108,7 +168,7 @@ public class TransactionService {
             return false;
         }
 
-        if (!valueGreaterThenZero(value)) {
+        if (valueIsNegativeOrZero(value)) {
             System.out.println("The value must be greater than zero.");
             return false;
         }
@@ -116,16 +176,16 @@ public class TransactionService {
         return true;
     }
 
-    private static boolean hasBalance(Account account, BigDecimal value) {
-        return account.getBalance().compareTo(value) >= 0;
+    private static boolean missingFunds(Account account, BigDecimal value) {
+        return account.getBalance().compareTo(value) < 0;
     }
 
     private static boolean isSameAccount(Account sourceAccount, Account destinationAccount) {
         return sourceAccount.equals(destinationAccount);
     }
 
-    private static boolean valueGreaterThenZero(BigDecimal value) {
-        return value.compareTo(BigDecimal.ZERO) > 0;
+    private static boolean valueIsNegativeOrZero(BigDecimal value) {
+        return value.compareTo(BigDecimal.ZERO) <= 0;
     }
 
 }
