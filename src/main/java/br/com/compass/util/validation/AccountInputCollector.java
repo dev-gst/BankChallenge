@@ -21,7 +21,7 @@ public class AccountInputCollector {
 
     public AccountType collectAccountType(String message) {
         String rawAccountType = collector.collectInput(message, accountTypeValidator);
-        return AccountType.fromDescription(rawAccountType.toUpperCase());
+        return AccountType.fromCode(Integer.parseInt(rawAccountType));
     }
 
 }
