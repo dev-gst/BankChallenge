@@ -171,8 +171,9 @@ public class Client {
 
     @PrePersist
     public void prePersist() {
-        createdAt = Instant.now();
-        updatedAt = Instant.now();
+        Instant now = Instant.now();
+        createdAt = now;
+        updatedAt = now;
     }
 
     @PreUpdate
