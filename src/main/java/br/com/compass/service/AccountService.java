@@ -5,7 +5,6 @@ import br.com.compass.model.Client;
 import br.com.compass.model.enumeration.AccountType;
 import br.com.compass.repository.dao.AccountDAO;
 import br.com.compass.util.validation.AccountInputCollector;
-import jakarta.persistence.NoResultException;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -52,6 +51,9 @@ public class AccountService {
         }
     }
 
+    public Account login(String cpf, String password) {
+        return accountDAO.findByClientCpfAndPassword(cpf, password);
+    }
 
     private String generateAccountNumber(AccountType accountType) {
         int digit1 = new Random().nextInt(9);
