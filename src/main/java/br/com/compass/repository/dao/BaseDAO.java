@@ -2,27 +2,47 @@ package br.com.compass.repository.dao;
 
 import br.com.compass.repository.BasicCRUD;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 public class BaseDAO<T> implements BasicCRUD<T> {
 
+    private final Session session;
     private final EntityManager entityManager;
     private final Class<T> entityClass;
 
     public BaseDAO(EntityManager entityManager, Class<T> entityClass) {
         this.entityManager = entityManager;
         this.entityClass = entityClass;
+        session = entityManager.unwrap(Session.class);
     }
 
     public void startTransaction() {
-        entityManager.getTransaction().begin();
+        EntityTransaction transaction = entityManager.getTransaction();
+        if (!isTransactionActive()) {
+            transaction.begin();
+        }
     }
 
     public void commitTransaction() {
-        entityManager.getTransaction().commit();
+        EntityTransaction transaction = entityManager.getTransaction();
+        if (transaction != null && transaction.isActive()) {
+            transaction.commit();
+        }
     }
 
     public void rollbackTransaction() {
-        entityManager.getTransaction().rollback();
+        EntityTransaction transaction = entityManager.getTransaction();
+        if (transaction != null && transaction.isActive()) {
+            transaction.rollback();
+        }
+    }
+
+    protected boolean isTransactionActive() {
+        return session != null &&
+                session.getTransaction() != null &&
+                session.getTransaction().isActive();
     }
 
     @Override
