@@ -23,6 +23,12 @@ public class AccountService {
         this.collector = collector;
     }
 
+    public Optional<Account> findDestinationByAccountNumber() {
+        String accountNumber = collector.collectAccountNumber("Enter the destination account number: ");
+
+        return Optional.of(accountDAO.findByAccountNumber(accountNumber));
+    }
+
     public Optional<Account> createAccount(Client client) {
         AccountType accountType = collector.collectAccountType(
                 """
@@ -58,14 +64,27 @@ public class AccountService {
         return accountDAO.findByClientCpfAndPassword(cpf, password);
     }
 
+    public void updateBalance(Account account, BigDecimal newBalance) {
+        try {
+            accountDAO.startTransaction();
+            account.setBalance(newBalance);
+            accountDAO.update(account);
+            accountDAO.commitTransaction();
+        } catch (Exception ignored) {
+            accountDAO.rollbackTransaction();
+            System.out.println("An error occurred while updating the balance.");
+        }
+    }
+
     private String generateAccountNumber(AccountType accountType) {
         int digit1 = new Random().nextInt(9);
         int digit2 = new Random().nextInt(9);
         int digit3 = new Random().nextInt(9);
         int digit4 = new Random().nextInt(9);
         int digit5 = new Random().nextInt(9);
+        int digit6 = new Random().nextInt(9);
 
-        String randomNumber = String.format("%d%d%d%d%d", digit1, digit2, digit3, digit4, digit5);
+        String randomNumber = String.format("%d%d%d%d%d%d", digit1, digit2, digit3, digit4, digit5, digit6);
 
         String  accountNumber = switch (accountType) {
             case CHECKING -> String.format("001-%s", randomNumber);
