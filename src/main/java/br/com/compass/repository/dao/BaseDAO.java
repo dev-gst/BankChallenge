@@ -13,6 +13,18 @@ public class BaseDAO<T> implements BasicCRUD<T> {
         this.entityClass = entityClass;
     }
 
+    public void startTransaction() {
+        entityManager.getTransaction().begin();
+    }
+
+    public void commitTransaction() {
+        entityManager.getTransaction().commit();
+    }
+
+    public void rollbackTransaction() {
+        entityManager.getTransaction().rollback();
+    }
+
     @Override
     public T findById(Long id) {
         return entityManager.find(entityClass, id);
