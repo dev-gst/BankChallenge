@@ -12,7 +12,7 @@ public class ClientService {
     private final BaseDAO<Client> clientDAO;
     private final ClientInputCollector collector;
 
-    public ClientService( ClientInputCollector collector, BaseDAO<Client> clientDAO) {
+    public ClientService(BaseDAO<Client> clientDAO, ClientInputCollector collector) {
         this.clientDAO = clientDAO;
         this.collector = collector;
     }
