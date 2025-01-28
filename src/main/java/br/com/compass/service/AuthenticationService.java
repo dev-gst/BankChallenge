@@ -11,13 +11,16 @@ public class AuthenticationService {
 
     private final AccountService accountService;
     private final ClientService clientService;
+    private final ClientInputCollector clientInputCollector;
 
     public AuthenticationService(
             AccountService accountService,
-            ClientService clientService
+            ClientService clientService,
+            ClientInputCollector clientInputCollector
     ) {
         this.accountService = accountService;
         this.clientService = clientService;
+        this.clientInputCollector = clientInputCollector;
     }
 
     public void createAccount() {
@@ -33,7 +36,7 @@ public class AuthenticationService {
         client.ifPresent(accountService::createAccount);
     }
 
-    public Account login(ClientInputCollector clientInputCollector) {
+    public Account login() {
         System.out.println("Login");
 
         String cpf = clientInputCollector.collectCPF("Enter your CPF: ");
