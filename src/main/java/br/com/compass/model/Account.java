@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
-import java.util.UUID;
 
 @Entity
 @Table(name = "account")
@@ -41,7 +40,7 @@ public class Account {
 
     private Account(Builder builder) {
         this.client = builder.client;
-        this.accountNumber = UUID.randomUUID().toString();
+        this.accountNumber = builder.accountNumber;
         this.balance = builder.balance;
         this.accountType = builder.accountType;
     }
