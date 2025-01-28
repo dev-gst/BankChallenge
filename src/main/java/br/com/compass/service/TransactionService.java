@@ -8,6 +8,9 @@ import br.com.compass.util.exception.UserCancellationInput;
 import br.com.compass.util.validation.TransactionInputCollector;
 
 import java.math.BigDecimal;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 public class TransactionService {
 
@@ -61,13 +64,13 @@ public class TransactionService {
                     .withType(TransactionType.TRANSFER)
                     .build();
 
+            transactionDAO.save(transaction);
+
             BigDecimal sourceNewBalance = sourceAccount.getBalance().subtract(value);
             BigDecimal destinationNewBalance = destinationAccount.getBalance().add(value);
 
             accountService.updateBalance(sourceAccount, sourceNewBalance);
             accountService.updateBalance(destinationAccount, destinationNewBalance);
-
-            transactionDAO.save(transaction);
 
             transactionDAO.commitTransaction();
         } catch (Exception ignored) {
@@ -140,16 +143,28 @@ public class TransactionService {
                     .withType(TransactionType.WITHDRAW)
                     .build();
 
+            transactionDAO.save(transaction);
+
             BigDecimal newBalance = sourceAccount.getBalance().subtract(value);
 
             accountService.updateBalance(sourceAccount, newBalance);
-
-            transactionDAO.save(transaction);
 
             transactionDAO.commitTransaction();
         } catch (Exception ignored) {
             transactionDAO.rollbackTransaction();
             System.out.println("An error occurred while withdrawing the amount.");
+        }
+    }
+
+    public void showTransactions(Account account) {
+        try {
+            List<Transaction> transactions = transactionDAO.findByAccount(account);
+            transactions.stream()
+                    .map(this::formatTransactionLine)
+                    .forEach(System.out::println);
+        } catch (Exception ignored) {
+            transactionDAO.rollbackTransaction();
+            System.out.println("An error occurred while listing the transactions.");
         }
     }
 
@@ -186,6 +201,39 @@ public class TransactionService {
 
     private static boolean valueIsNegativeOrZero(BigDecimal value) {
         return value.compareTo(BigDecimal.ZERO) <= 0;
+    }
+
+    private String formatTransactionLine(Transaction transaction) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
+                .withZone(ZoneId.systemDefault());
+
+        return switch (transaction.getType()) {
+            case TRANSFER -> String.format(
+                    "Transaction ID: %d | Type: %s | Amount: %s | Date: %s | Source Account: %s | Destination Account: %s",
+                    transaction.getId(),
+                    transaction.getType(),
+                    transaction.getAmount(),
+                    formatter.format(transaction.createdAt()),
+                    transaction.getSourceAccount().getAccountNumber(),
+                    transaction.getDestinationAccount().getAccountNumber()
+            );
+            case DEPOSIT -> String.format(
+                    "Transaction ID: %d | Type: %s | Amount: %s | Date: %s | Destination Account: %s",
+                    transaction.getId(),
+                    transaction.getType(),
+                    transaction.getAmount(),
+                    formatter.format(transaction.createdAt()),
+                    transaction.getDestinationAccount().getAccountNumber()
+            );
+            default -> String.format(
+                    "Transaction ID: %d | Type: %s | Amount: %s | Date: %s | Source Account: %s",
+                    transaction.getId(),
+                    transaction.getType(),
+                    transaction.getAmount(),
+                    formatter.format(transaction.createdAt()),
+                    transaction.getSourceAccount().getAccountNumber()
+            );
+        };
     }
 
 }
