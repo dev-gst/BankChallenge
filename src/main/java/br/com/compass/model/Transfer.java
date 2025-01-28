@@ -2,19 +2,11 @@ package br.com.compass.model;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
 @Table(name = "transfer")
 public class Transfer {
-
-    public enum TransferStatus {
-        PENDING,
-        COMPLETED,
-        FAILED,
-        CANCELLED
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,13 +22,6 @@ public class Transfer {
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
-
-    @Column(nullable = false)
-    private LocalDateTime timestamp;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TransferStatus status;
 
     @Column(length = 100)
     private String description;
@@ -84,16 +69,8 @@ public class Transfer {
         this.amount = amount;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public TransferStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(TransferStatus status) {
-        this.status = status;
+    public Instant getTimestamp() {
+        return createdAt;
     }
 
     public String getDescription() {
@@ -102,6 +79,14 @@ public class Transfer {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    private Instant createdAt() {
+        return createdAt;
+    }
+
+    private Instant updatedAt() {
+        return updatedAt;
     }
 
     @Override
@@ -114,7 +99,6 @@ public class Transfer {
                 Objects.equals(getDestinationAccount(), transfer.getDestinationAccount()) &&
                 Objects.equals(getAmount(), transfer.getAmount()) &&
                 Objects.equals(getTimestamp(), transfer.getTimestamp()) &&
-                getStatus() == transfer.getStatus() &&
                 Objects.equals(getDescription(), transfer.getDescription()) &&
                 Objects.equals(createdAt, transfer.createdAt) &&
                 Objects.equals(updatedAt, transfer.updatedAt);
@@ -127,7 +111,6 @@ public class Transfer {
         result = 31 * result + Objects.hashCode(getDestinationAccount());
         result = 31 * result + Objects.hashCode(getAmount());
         result = 31 * result + Objects.hashCode(getTimestamp());
-        result = 31 * result + Objects.hashCode(getStatus());
         result = 31 * result + Objects.hashCode(getDescription());
         result = 31 * result + Objects.hashCode(createdAt);
         result = 31 * result + Objects.hashCode(updatedAt);
@@ -136,10 +119,10 @@ public class Transfer {
 
     @PrePersist
     public void prePersist() {
-        this.createdAt = Instant.now();
-        this.updatedAt = Instant.now();
-        this.timestamp = LocalDateTime.now();
-        this.status = TransferStatus.PENDING;
+        Instant now = Instant.now();
+
+        this.createdAt = now;
+        this.updatedAt = now;
     }
 
     @PreUpdate
@@ -152,7 +135,6 @@ public class Transfer {
         Account sourceAccount;
         Account destinationAccount;
         BigDecimal amount;
-        LocalDateTime timestamp;
         String description;
 
         public Builder withSourceAccount(Account sourceAccount) {
