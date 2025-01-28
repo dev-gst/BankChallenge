@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UserInputCollectorTest {
 
-
     @Test
     void collectInput_validInput() {
         Scanner scanner = new Scanner("validInput");
