@@ -4,7 +4,13 @@ import java.util.Scanner;
 
 public class UserInputCollector {
 
-    public static String collectInput(String message, Validator validator, Scanner scanner) {
+    private final Scanner scanner;
+
+    public UserInputCollector(Scanner scanner) {
+        this.scanner = scanner;
+    }
+
+    public String collectInput(String message, Validator validator) {
         System.out.print(message);
         String input;
         while (true) {
@@ -13,7 +19,9 @@ public class UserInputCollector {
                 break;
             }
             System.out.println("Invalid input. Please, try again.");
+            System.out.print(message);
         }
+
         return input;
     }
 
