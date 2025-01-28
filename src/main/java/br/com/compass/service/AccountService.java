@@ -26,7 +26,12 @@ public class AccountService {
     public Optional<Account> findDestinationByAccountNumber() {
         String accountNumber = collector.collectAccountNumber("Enter the destination account number: ");
 
-        return Optional.of(accountDAO.findByAccountNumber(accountNumber));
+        Account account = accountDAO.findByAccountNumber(accountNumber);
+        if (account == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(account);
     }
 
     public Optional<Account> createAccount(Client client) {
