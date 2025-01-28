@@ -4,7 +4,6 @@ import br.com.compass.repository.BasicCRUD;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 
 public class BaseDAO<T> implements BasicCRUD<T> {
 
