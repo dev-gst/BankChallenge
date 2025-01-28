@@ -34,7 +34,7 @@ public class AuthenticationService {
     }
 
     public Account login(ClientInputCollector clientInputCollector) {
-        System.out.println("Login.");
+        System.out.println("Login");
 
         String cpf = clientInputCollector.collectCPF("Enter your CPF: ");
         String password = clientInputCollector.collectPassword("Enter your password: ");
