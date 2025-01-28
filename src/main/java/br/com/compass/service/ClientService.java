@@ -40,9 +40,9 @@ public class ClientService {
         String lastName = collector.collectName("Enter your last name: ");
         String phone = collector.collectPhone("Enter your phone: ");
         String email = collector.collectEmail("Enter your email: ");
-        String password = collector.collectPassword("Enter your password: ");
-        String cpf = collector.collectCPF("Enter your cpf: ");
-        LocalDate birthDate = collector.collectBirthDate("Enter your birth date: ");
+        String password = collector.collectPassword("Enter your password (8-20 characters): ");
+        String cpf = collector.collectCPF("Enter your cpf (only numbers): ");
+        LocalDate birthDate = collector.collectBirthDate("Enter your birth date (dd-MM-yyyy): ");
 
         client = new Client.Builder()
                 .withFirstName(firstName)

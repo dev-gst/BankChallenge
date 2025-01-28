@@ -9,7 +9,7 @@ public class ClientInputCollector {
             input -> !input.isBlank() && input.length() <= 100 && input.length() >= 2;
 
     private static final Validator CPF_VALIDATOR =
-            input -> input.matches("\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}");
+            input -> input.matches("\\d{11}");
 
     private static final Validator EMAIL_VALIDATOR =
             input -> input.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
