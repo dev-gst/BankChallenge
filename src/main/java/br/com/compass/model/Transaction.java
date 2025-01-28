@@ -75,7 +75,7 @@ public class Transaction {
         return createdAt;
     }
 
-    private TransactionType getType() {
+    public TransactionType getType() {
         return type;
     }
 
@@ -83,11 +83,11 @@ public class Transaction {
         this.type = type;
     }
 
-    private Instant createdAt() {
+    public Instant createdAt() {
         return createdAt;
     }
 
-    private Instant updatedAt() {
+    public Instant updatedAt() {
         return updatedAt;
     }
 
