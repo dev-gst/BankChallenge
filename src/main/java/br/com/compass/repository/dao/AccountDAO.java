@@ -24,6 +24,23 @@ public class AccountDAO extends BaseDAO<Account> {
             return entityManager.createQuery(rawQuery, Account.class)
                     .setParameter("accountNumber", accountNumber)
                     .getSingleResult();
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    public Account findByClientCpfAndPassword(String cpf, String password) {
+        String rawQuery = """
+                SELECT a
+                    FROM Account a
+                    WHERE a.client.cpf = :cpf
+                    AND a.client.password = :password
+                """;
+        try {
+            return entityManager.createQuery(rawQuery, Account.class)
+                    .setParameter("cpf", cpf)
+                    .setParameter("password", password)
+                    .getSingleResult();
         } catch (Exception e) {
             return null;
         }
