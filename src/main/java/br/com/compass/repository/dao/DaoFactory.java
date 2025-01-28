@@ -13,8 +13,16 @@ public class DaoFactory {
 
     private static final EntityManager em = emf.createEntityManager();
 
-    public <T> BaseDAO<T> createBaseDAO(Class<T> entityClass) {
-        return new BaseDAO<>(em, entityClass);
+    public static ClientDAO createClientDAO() {
+        return new ClientDAO(em);
+    }
+
+    public static AccountDAO createAccountDAO() {
+        return new AccountDAO(em);
+    }
+
+    public static TransactionDAO createTransactionDAO() {
+        return new TransactionDAO(em);
     }
 
 }
