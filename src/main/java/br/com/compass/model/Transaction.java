@@ -1,4 +1,5 @@
 package br.com.compass.model;
+import br.com.compass.model.enumeration.TransactionType;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -6,25 +7,26 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "transfer")
-public class Transfer {
+public class Transaction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "source_account_id", nullable = false)
+    @JoinColumn(name = "source_account_id")
     private Account sourceAccount;
 
     @ManyToOne
-    @JoinColumn(name = "destination_account_id", nullable = false)
+    @JoinColumn(name = "destination_account_id")
     private Account destinationAccount;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 
-    @Column(length = 100)
-    private String description;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private TransactionType type;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
@@ -32,13 +34,13 @@ public class Transfer {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
-    public Transfer() { }
+    public Transaction() { }
 
-    private Transfer(Builder builder) {
+    private Transaction(Builder builder) {
         this.sourceAccount = builder.sourceAccount;
         this.destinationAccount = builder.destinationAccount;
         this.amount = builder.amount;
-        this.description = builder.description;
+        this.type = builder.type;
     }
 
     public Long getId() {
@@ -73,12 +75,12 @@ public class Transfer {
         return createdAt;
     }
 
-    public String getDescription() {
-        return description;
+    private TransactionType getType() {
+        return type;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setType(TransactionType type) {
+        this.type = type;
     }
 
     private Instant createdAt() {
@@ -93,15 +95,14 @@ public class Transfer {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
 
-        Transfer transfer = (Transfer) o;
-        return Objects.equals(getId(), transfer.getId()) &&
-                Objects.equals(getSourceAccount(), transfer.getSourceAccount()) &&
-                Objects.equals(getDestinationAccount(), transfer.getDestinationAccount()) &&
-                Objects.equals(getAmount(), transfer.getAmount()) &&
-                Objects.equals(getTimestamp(), transfer.getTimestamp()) &&
-                Objects.equals(getDescription(), transfer.getDescription()) &&
-                Objects.equals(createdAt, transfer.createdAt) &&
-                Objects.equals(updatedAt, transfer.updatedAt);
+        Transaction transaction = (Transaction) o;
+        return Objects.equals(getId(), transaction.getId()) &&
+                Objects.equals(getSourceAccount(), transaction.getSourceAccount()) &&
+                Objects.equals(getDestinationAccount(), transaction.getDestinationAccount()) &&
+                Objects.equals(getAmount(), transaction.getAmount()) &&
+                Objects.equals(getType(), transaction.getType()) &&
+                Objects.equals(createdAt, transaction.createdAt) &&
+                Objects.equals(updatedAt, transaction.updatedAt);
     }
 
     @Override
@@ -110,8 +111,7 @@ public class Transfer {
         result = 31 * result + Objects.hashCode(getSourceAccount());
         result = 31 * result + Objects.hashCode(getDestinationAccount());
         result = 31 * result + Objects.hashCode(getAmount());
-        result = 31 * result + Objects.hashCode(getTimestamp());
-        result = 31 * result + Objects.hashCode(getDescription());
+        result = 31 * result + Objects.hashCode(getType());
         result = 31 * result + Objects.hashCode(createdAt);
         result = 31 * result + Objects.hashCode(updatedAt);
         return result;
@@ -135,7 +135,7 @@ public class Transfer {
         Account sourceAccount;
         Account destinationAccount;
         BigDecimal amount;
-        String description;
+        TransactionType type;
 
         public Builder withSourceAccount(Account sourceAccount) {
             this.sourceAccount = sourceAccount;
@@ -152,13 +152,13 @@ public class Transfer {
             return this;
         }
 
-        public Builder withDescription(String description) {
-            this.description = description;
+        public Builder withType(TransactionType type) {
+            this.type = type;
             return this;
         }
 
-        public Transfer build() {
-            return new Transfer(this);
+        public Transaction build() {
+            return new Transaction(this);
         }
 
     }
