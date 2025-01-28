@@ -12,10 +12,13 @@ import java.util.Random;
 
 public class AccountService {
 
-    private final AccountInputCollector collector;
     private final AccountDAO accountDAO;
+    private final AccountInputCollector collector;
 
-    public AccountService(AccountDAO accountDAO, AccountInputCollector collector) {
+    public AccountService(
+            AccountDAO accountDAO,
+            AccountInputCollector collector
+    ) {
         this.accountDAO = accountDAO;
         this.collector = collector;
     }
@@ -43,7 +46,7 @@ public class AccountService {
             accountDAO.commitTransaction();
 
             return Optional.of(account);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             accountDAO.rollbackTransaction();
             System.out.println("An error occurred while creating the account. Please try again.");
 
@@ -54,6 +57,12 @@ public class AccountService {
     public Account login(String cpf, String password) {
         return accountDAO.findByClientCpfAndPassword(cpf, password);
     }
+
+    public void displayBalance(Account account) {
+        BigDecimal balance = accountDAO.getBalance(account);
+        System.out.printf("Your current balance is: $%.2f%n", balance);
+    }
+
 
     private String generateAccountNumber(AccountType accountType) {
         int digit1 = new Random().nextInt(9);
