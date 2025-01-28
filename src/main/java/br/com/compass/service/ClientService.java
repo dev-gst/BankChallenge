@@ -5,6 +5,7 @@ import br.com.compass.repository.dao.BaseDAO;
 import br.com.compass.util.validation.ClientInputCollector;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class ClientService {
 
@@ -16,15 +17,19 @@ public class ClientService {
         this.collector = collector;
     }
 
-    public void createClient() {
+    public Optional<Client> createClient() {
         Client client = getUserInfo();
         try {
             clientDAO.startTransaction();
             clientDAO.save(client);
             clientDAO.commitTransaction();
+
+            return Optional.of(client);
         } catch (Exception e) {
             clientDAO.rollbackTransaction();
             System.out.println("An error occurred while creating the client.");
+
+            return Optional.empty();
         }
     }
 
