@@ -1,6 +1,7 @@
 package br.com.compass.model;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -39,6 +40,12 @@ public class Transfer {
 
     @Column(length = 100)
     private String description;
+
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
 
     public Transfer() { }
 
@@ -108,7 +115,9 @@ public class Transfer {
                 Objects.equals(getAmount(), transfer.getAmount()) &&
                 Objects.equals(getTimestamp(), transfer.getTimestamp()) &&
                 getStatus() == transfer.getStatus() &&
-                Objects.equals(getDescription(), transfer.getDescription());
+                Objects.equals(getDescription(), transfer.getDescription()) &&
+                Objects.equals(createdAt, transfer.createdAt) &&
+                Objects.equals(updatedAt, transfer.updatedAt);
     }
 
     @Override
@@ -120,13 +129,22 @@ public class Transfer {
         result = 31 * result + Objects.hashCode(getTimestamp());
         result = 31 * result + Objects.hashCode(getStatus());
         result = 31 * result + Objects.hashCode(getDescription());
+        result = 31 * result + Objects.hashCode(createdAt);
+        result = 31 * result + Objects.hashCode(updatedAt);
         return result;
     }
 
     @PrePersist
     public void prePersist() {
+        this.createdAt = Instant.now();
+        this.updatedAt = Instant.now();
         this.timestamp = LocalDateTime.now();
         this.status = TransferStatus.PENDING;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.updatedAt = Instant.now();
     }
 
     public static class Builder {

@@ -5,11 +5,19 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
+import java.util.Random;
+import java.util.UUID;
 
 @Entity
 @Table(name = "account")
 @SuppressWarnings("unused")
 public class Account {
+
+    public enum AccountType {
+        CHECKING,
+        SAVINGS,
+        SALARY
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,8 +33,9 @@ public class Account {
     @Column(name = "balance", nullable = false, precision = 10, scale = 2)
     private BigDecimal balance;
 
-    @Column(name = "type", nullable = false, length = 20)
-    private String type;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private AccountType accountType;
 
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
@@ -38,8 +47,9 @@ public class Account {
 
     private Account(Builder builder) {
         this.client = builder.client;
+        this.accountNumber = UUID.randomUUID().toString();
         this.balance = builder.balance;
-        this.type = builder.type;
+        this.accountType = builder.accountType;
     }
 
     public Long getId() {
@@ -54,6 +64,10 @@ public class Account {
         this.client = client;
     }
 
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
     public BigDecimal getBalance() {
         return balance;
     }
@@ -62,12 +76,12 @@ public class Account {
         this.balance = balance;
     }
 
-    public String getType() {
-        return type;
+    public AccountType getType() {
+        return accountType;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setType(AccountType accountType) {
+        this.accountType = accountType;
     }
 
     public Instant getCreatedAt() {
@@ -116,11 +130,17 @@ public class Account {
     public static class Builder {
 
         private Client client;
+        private String accountNumber;
         private BigDecimal balance;
-        private String type;
+        private AccountType accountType;
 
-        public Builder withClientId(Client client) {
+        public Builder withClient(Client client) {
             this.client = client;
+            return this;
+        }
+
+        public Builder withAccountNumber(String accountNumber) {
+            this.accountNumber = accountNumber;
             return this;
         }
 
@@ -129,8 +149,8 @@ public class Account {
             return this;
         }
 
-        public Builder withType(String type) {
-            this.type = type;
+        public Builder withType(AccountType accountType) {
+            this.accountType = accountType;
             return this;
         }
 
