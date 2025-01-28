@@ -1,5 +1,6 @@
 package br.com.compass.util.validation;
 
+import br.com.compass.util.exception.UserCancellationInput;
 import org.junit.jupiter.api.Test;
 import java.util.Scanner;
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,6 +41,15 @@ class UserInputCollectorTest {
         Validator validator = input -> input.equals("validInput");
         String result = collector.collectInput("Enter input:", validator);
         assertEquals("validInput", result);
+    }
+
+    @Test
+    void collectInput_cancelCommand() {
+        Scanner scanner = new Scanner("cancel");
+        UserInputCollector collector = new UserInputCollector(scanner);
+        Validator validator = input -> input.equals("validInput");
+        assertThrows(UserCancellationInput.class, () ->
+                collector.collectInput("Enter input:", validator));
     }
 
 }
