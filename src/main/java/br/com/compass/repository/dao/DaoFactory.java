@@ -17,6 +17,10 @@ public class DaoFactory {
         return new BaseDAO<>(em, entityClass);
     }
 
+    public static ClientDAO createClientDAO() {
+        return new ClientDAO(em);
+    }
+
     public static AccountDAO createAccountDAO() {
         return new AccountDAO(em);
     }
