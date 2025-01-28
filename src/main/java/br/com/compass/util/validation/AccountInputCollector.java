@@ -1,13 +1,10 @@
 package br.com.compass.util.validation;
 
 import br.com.compass.model.enumeration.AccountType;
-import br.com.compass.util.validation.parser.BigDecimalParser;
-
-import java.math.BigDecimal;
 
 public class AccountInputCollector {
 
-    private static final Validator accountTypeValidator = input -> {
+    private static final Validator ACCOUNT_TYPE_VALIDATOR = input -> {
         try {
             AccountType.fromCode(Integer.parseInt(input));
             return true;
@@ -16,8 +13,7 @@ public class AccountInputCollector {
         }
     };
 
-    private static final Validator AMOUNT_VALIDATOR = input ->
-            BigDecimalParser.of(input) != null;
+    private static final Validator ACCOUNT_NUMBER_VALIDATOR = input -> input.matches("[\\d-]{10}");
 
     private final UserInputCollector collector;
 
@@ -26,13 +22,12 @@ public class AccountInputCollector {
     }
 
     public AccountType collectAccountType(String message) {
-        String rawAccountType = collector.collectInput(message, accountTypeValidator);
+        String rawAccountType = collector.collectInput(message, ACCOUNT_TYPE_VALIDATOR);
         return AccountType.fromCode(Integer.parseInt(rawAccountType));
     }
 
-    public BigDecimal collectAmount(String message) {
-        String input = collector.collectInput(message, AMOUNT_VALIDATOR);
-        return BigDecimalParser.of(input);
+    public String collectAccountNumber(String message) {
+        return collector.collectInput(message, ACCOUNT_NUMBER_VALIDATOR);
     }
 
 }
