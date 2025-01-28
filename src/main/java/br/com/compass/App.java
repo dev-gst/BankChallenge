@@ -45,9 +45,7 @@ public class App {
             return;
         }
 
-        boolean running = true;
-
-        while (running) {
+        while (true) {
             System.out.println("========= Main Menu =========");
             System.out.println("|| 1. Login                ||");
             System.out.println("|| 2. Account Opening      ||");
@@ -68,8 +66,7 @@ public class App {
                     authenticationService.createAccount();
                     break;
                 case 0:
-                    running = false;
-                    break;
+                    return;
                 default:
                     System.out.println("Invalid option! Please try again.");
             }
