@@ -1,7 +1,7 @@
 package br.com.compass.service;
 
 import br.com.compass.model.Client;
-import br.com.compass.repository.dao.BaseDAO;
+import br.com.compass.repository.dao.ClientDAO;
 import br.com.compass.util.validation.ClientInputCollector;
 
 import java.time.LocalDate;
@@ -9,16 +9,27 @@ import java.util.Optional;
 
 public class ClientService {
 
-    private final BaseDAO<Client> clientDAO;
+    private final ClientDAO clientDAO;
     private final ClientInputCollector collector;
 
-    public ClientService(BaseDAO<Client> clientDAO, ClientInputCollector collector) {
+    public ClientService(ClientDAO clientDAO, ClientInputCollector collector) {
         this.clientDAO = clientDAO;
         this.collector = collector;
     }
 
+    public Optional<Client> findClientByCpf(String email) {
+        return Optional.of(clientDAO.findByCpf(email));
+    }
+
     public Optional<Client> createClient() {
         Client client = getUserInfo();
+
+        Optional<Client> clientFound = findClientByCpf(client.getCpf());
+        if (clientFound.isPresent()) {
+            System.out.println("This cpf is already registered. Please try again.");
+            return Optional.empty();
+        }
+
         try {
             clientDAO.startTransaction();
             clientDAO.save(client);
